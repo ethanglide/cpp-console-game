@@ -25,6 +25,7 @@ target_link_libraries(
   cpp-console-game PRIVATE
   GameState
   conio
+  eRPC
   )
 
 target_link_libraries(

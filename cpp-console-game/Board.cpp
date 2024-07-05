@@ -16,7 +16,6 @@ namespace ConsoleGame
   void Board::draw()
   {
     std::cout << "\033[H";  // Move cursor to the top left corner
-    std::cout << "\033[2J"; // Clear the screen
 
     for (auto row : cells)
     {

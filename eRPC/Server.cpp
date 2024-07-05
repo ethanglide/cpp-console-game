@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
+#include <memory>
 
 namespace eRPC
 {
@@ -61,26 +62,26 @@ namespace eRPC
       std::cout << "Received request:\n"
                 << request.serialize() << std::endl;
 
-      Response response;
+      std::unique_ptr<Response> response;
       if (methods.find(request.getMethod()) != methods.end())
       {
         std::function<void *()> method = methods[request.getMethod()];
         method();
 
-        response = Response(
+        response = std::make_unique<Response>(Response(
             request.getMsgid(),
             true,
-            "RESULTS HERE");
+            "RESULTS HERE"));
       }
       else
       {
-        response = Response(
+        response = std::make_unique<Response>(Response(
             request.getMsgid(),
             false,
-            "Method \"" + request.getMethod() + "\" not found");
+            "Method not found"));
       }
 
-      std::string serialized = response.serialize();
+      std::string serialized = response->serialize();
       write(connfd, serialized.c_str(), serialized.size() + 1);
 
       close(connfd);

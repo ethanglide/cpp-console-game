@@ -4,10 +4,6 @@
 
 namespace eRPC
 {
-  Response::Response() : msgid(-1), ok(false), result()
-  {
-  }
-
   Response::Response(int msgid, bool ok, std::string result)
       : msgid(msgid), ok(ok), result(result)
   {

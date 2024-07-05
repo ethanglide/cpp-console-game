@@ -8,8 +8,6 @@ namespace eRPC
   class Response
   {
   public:
-    Response();
-    
     /**
      * Construct a response with the given message ID, status, and result.
      */

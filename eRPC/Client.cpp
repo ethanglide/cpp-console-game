@@ -8,25 +8,22 @@
 #include <unistd.h>
 #include <iostream>
 
+int msgIdCounter = 0;
+
 namespace eRPC
 {
-  Client::Client(std::string host, int port) : sockfd(-1), serv_addr()
+  Client::Client(std::string host, int port) : sockfd(-1), serverAddress()
   {
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-      throw std::runtime_error("Failed to create socket");
-    }
+    sockaddr_in serverAddress;
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(port);
 
-    sockaddr_in serv_addr;
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
-
-    if (inet_pton(AF_INET, host.c_str(), &serv_addr.sin_addr) <= 0)
+    if (inet_pton(AF_INET, host.c_str(), &serverAddress.sin_addr) <= 0)
     {
       throw std::runtime_error("Invalid address");
     }
 
-    this->serv_addr = serv_addr;
+    this->serverAddress = serverAddress;
   }
 
   Client::~Client()
@@ -36,39 +33,43 @@ namespace eRPC
 
   void Client::openConnection()
   {
-    if (sockfd < 0)
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      throw std::runtime_error("Socket not created");
+      throw std::runtime_error("Failed to create socket");
     }
 
-    if (connect(sockfd, (sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    if (connect(sockfd, (sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
       throw std::runtime_error("Failed to connect to server");
     }
-
-    std::cout << "Connected to server" << std::endl;
   }
 
   void Client::closeConnection()
   {
     close(sockfd);
+    sockfd = -1;
   }
 
-  void Client::call(std::string method)
+  std::string Client::call(std::string method, std::vector<std::string> params)
   {
-    if (sockfd < 0)
-    {
-      throw std::runtime_error("Socket not created");
-    }
+    Client::openConnection();
 
-    Request request(0, method, {"First argument", "Another argument"});
+    Request request(msgIdCounter++, method, params);
     auto serialized = request.serialize();
     write(sockfd, serialized.c_str(), serialized.size() + 1);
 
     char buffer[1024] = {0};
     read(sockfd, buffer, 1024);
 
+    Client::closeConnection();
+
     Response response(buffer);
-    std::cout << "Received response:\n" << response.serialize() << std::endl;
+
+    if (!response.isOk())
+    {
+      throw std::runtime_error(response.getResult());
+    }
+
+    return response.getResult();
   }
 }

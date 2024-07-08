@@ -6,7 +6,6 @@
 #include <netinet/in.h>
 #include <stdexcept>
 #include <unistd.h>
-#include <iostream>
 #include <memory>
 
 namespace eRPC
@@ -32,8 +31,6 @@ namespace eRPC
     {
       throw std::runtime_error("Failed to listen on socket");
     }
-
-    std::cout << "Server listening on port " << port << std::endl;
   }
 
   Server::~Server()
@@ -52,36 +49,32 @@ namespace eRPC
 
     while (running)
     {
-      std::cout << "Waiting for connection" << std::endl;
-
-      int connfd = accept(sockfd, (sockaddr *)NULL, NULL);
+      auto connfd = accept(sockfd, (sockaddr *)NULL, NULL);
 
       char buffer[1024] = {0};
       read(connfd, buffer, 1024);
       Request request(buffer);
-      std::cout << "Received request:\n"
-                << request.serialize() << std::endl;
 
       std::unique_ptr<Response> response;
       if (methods.find(request.getMethod()) != methods.end())
       {
-        std::function<void *()> method = methods[request.getMethod()];
-        method();
+        auto method = methods[request.getMethod()];
+        auto ret = method(request.getParams());
 
         response = std::make_unique<Response>(Response(
             request.getMsgid(),
-            true,
-            "RESULTS HERE"));
+            ret.first,
+            ret.second));
       }
       else
       {
         response = std::make_unique<Response>(Response(
             request.getMsgid(),
             false,
-            "Method not found"));
+            "Method \"" + request.getMethod() + "\" not found"));
       }
 
-      std::string serialized = response->serialize();
+      auto serialized = response->serialize();
       write(connfd, serialized.c_str(), serialized.size() + 1);
 
       close(connfd);
@@ -95,7 +88,7 @@ namespace eRPC
     running = false;
   }
 
-  void Server::bindMethod(std::string method, std::function<void *()> callback)
+  void Server::bindMethod(std::string method, std::function<std::pair<bool, std::string>(std::vector<std::string>)> callback)
   {
     methods[method] = callback;
   }

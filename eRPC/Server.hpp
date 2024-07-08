@@ -33,12 +33,12 @@ namespace eRPC
     /**
      * Bind a method to a callback.
      */
-    void bindMethod(std::string method, std::function<void *()> callback);
-  
+    void bindMethod(std::string method, std::function<std::pair<bool, std::string>(std::vector<std::string>)> callback);
+
   private:
     int sockfd;
     bool running;
-    std::unordered_map<std::string, std::function<void *()>> methods;
+    std::unordered_map<std::string, std::function<std::pair<bool, std::string>(std::vector<std::string>)>> methods;
   };
 }
 

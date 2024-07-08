@@ -17,7 +17,7 @@ namespace eRPC
     std::getline(iss, line);
     if (line != "eRPC 1.0")
     {
-      throw std::runtime_error("Invalid message");
+      throw std::runtime_error("Invalid Response");
     }
 
     std::getline(iss, line);

@@ -51,6 +51,30 @@ void renderLoop()
   }
 }
 
+std::pair<bool, std::string> movePlayer(std::vector<std::string> args)
+{
+  int playerId = std::stoi(args[0]);
+  int x = std::stoi(args[1]);
+  int y = std::stoi(args[2]);
+
+  //gameState.movePlayer(playerId, {x, y});
+  std::cout << "Player " << playerId << " moved to (" << x << ", " << y << ")" << std::endl;
+
+  return {true, "Move Successful"};
+}
+
+std::pair<bool, std::string> echo(std::vector<std::string> args)
+{
+  for (auto arg : args)
+  {
+    std::cout << arg << " ";
+  }
+
+  std::cout << std::endl;
+
+  return {true, "Echo Successful"};
+}
+
 int main(int argc, char **argv)
 {
   if (argc < 4)
@@ -66,14 +90,20 @@ int main(int argc, char **argv)
   if (mode == "server")
   {
     eRPC::Server server(port);
+    server.bindMethod("movePlayer", movePlayer);
+    server.bindMethod("echo", echo);
     server.start();
   }
   else if (mode == "client")
   {
     eRPC::Client client(host, port);
-    client.openConnection();
-    client.call("Hello from client");
-    client.closeConnection();
+    
+    client.call("echo", {"Hello", "World"});
+    client.call("movePlayer", {"1", "5", "5"});
+    client.call("movePlayer", {"1", "6", "6"});
+    auto ret = client.call("echol", {"Goodbye", "World"});
+
+    std::cout << "Result: " << ret << std::endl;
   }
   else
   {

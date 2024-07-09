@@ -68,11 +68,11 @@ namespace ConsoleGame
     return players[id].getPosition();
   }
 
-  void GameState::draw()
+  std::string GameState::draw()
   {
     std::lock_guard<std::mutex> lock(mutex);
 
-    board.draw();
+    return board.draw();
   }
 
   bool GameState::isRunning()

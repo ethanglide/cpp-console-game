@@ -13,18 +13,20 @@ namespace ConsoleGame
     }
   }
 
-  void Board::draw()
+  std::string Board::draw()
   {
-    std::cout << "\033[H";  // Move cursor to the top left corner
+    std::string board = "\033[H";  // Move cursor to the top left corner
 
     for (auto row : cells)
     {
       for (auto cell : row)
       {
-        std::cout << cell;
+        board += cell;
       }
-      std::cout << std::endl;
+      board += "|";
     }
+
+    return board;
   }
 
   void Board::setCell(int x, int y, std::string value)

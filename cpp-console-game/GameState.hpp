@@ -13,7 +13,7 @@ namespace ConsoleGame
   class GameState
   {
   public:
-    GameState(int width, int heigh, std::string fill = "#");
+    GameState(int width, int height, std::string fill = "#");
 
     /**
      * Add a player to the game
@@ -44,7 +44,7 @@ namespace ConsoleGame
     /**
      * Draw the game board
      */
-    void draw();
+    std::string draw();
 
     /**
      * Check if the game is running

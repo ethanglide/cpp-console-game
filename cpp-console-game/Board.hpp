@@ -16,7 +16,7 @@ namespace ConsoleGame
      * @param fill The string to fill the board with
      */
     Board(int width, int height, std::string fill = "#");
-    void draw();
+    std::string draw();
     void setCell(int x, int y, std::string value);
     std::string getCell(int x, int y);
     int getWidth();

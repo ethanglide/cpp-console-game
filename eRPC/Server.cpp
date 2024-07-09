@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <memory>
+#include <thread>
 
 namespace eRPC
 {
@@ -50,11 +51,47 @@ namespace eRPC
     while (running)
     {
       auto connfd = accept(sockfd, (sockaddr *)NULL, NULL);
+      if (connfd < 0)
+      {
+        throw std::runtime_error("Failed to accept connection");
+      }
 
+      // Start a new thread to serve the client
+      std::thread(&Server::serveClient, this, connfd).detach();
+    }
+
+    close(sockfd);
+  }
+
+  void Server::stop()
+  {
+    running = false;
+  }
+
+  void Server::bindMethod(std::string method, std::function<std::pair<bool, std::string>(std::vector<std::string>)> callback)
+  {
+    methods[method] = callback;
+  }
+
+  void Server::serveClient(int connfd)
+  {
+    while (true)
+    {
       char buffer[1024] = {0};
-      read(connfd, buffer, 1024);
+      if (read(connfd, buffer, 1024) <= 0)
+      {
+        break;
+      }
+
+      // Parse the request
       Request request(buffer);
 
+      if (request.getMethod() == "disconnect")
+      {
+        break;
+      }
+
+      // Call the method if it exists to generate a response
       std::unique_ptr<Response> response;
       if (methods.find(request.getMethod()) != methods.end())
       {
@@ -76,20 +113,8 @@ namespace eRPC
 
       auto serialized = response->serialize();
       write(connfd, serialized.c_str(), serialized.size() + 1);
-
-      close(connfd);
     }
 
-    close(sockfd);
-  }
-
-  void Server::stop()
-  {
-    running = false;
-  }
-
-  void Server::bindMethod(std::string method, std::function<std::pair<bool, std::string>(std::vector<std::string>)> callback)
-  {
-    methods[method] = callback;
+    close(connfd);
   }
 }

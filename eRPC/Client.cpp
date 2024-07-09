@@ -6,7 +6,6 @@
 #include <arpa/inet.h>
 #include <stdexcept>
 #include <unistd.h>
-#include <iostream>
 
 int msgIdCounter = 0;
 
@@ -24,15 +23,7 @@ namespace eRPC
     }
 
     this->serverAddress = serverAddress;
-  }
 
-  Client::~Client()
-  {
-    closeConnection();
-  }
-
-  void Client::openConnection()
-  {
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
       throw std::runtime_error("Failed to create socket");
@@ -44,24 +35,25 @@ namespace eRPC
     }
   }
 
-  void Client::closeConnection()
+  Client::~Client()
   {
+    Request request(msgIdCounter++, "disconnect", {});
+
+    auto serialized = request.serialize();
+    write(sockfd, serialized.c_str(), serialized.size() + 1);
+
     close(sockfd);
     sockfd = -1;
   }
 
   std::string Client::call(std::string method, std::vector<std::string> params)
   {
-    Client::openConnection();
-
     Request request(msgIdCounter++, method, params);
     auto serialized = request.serialize();
     write(sockfd, serialized.c_str(), serialized.size() + 1);
 
     char buffer[1024] = {0};
     read(sockfd, buffer, 1024);
-
-    Client::closeConnection();
 
     Response response(buffer);
 

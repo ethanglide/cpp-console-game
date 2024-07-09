@@ -17,9 +17,6 @@ namespace eRPC
   private:
     int sockfd;
     sockaddr_in serverAddress;
-
-    void openConnection();
-    void closeConnection();
   };
 }
 

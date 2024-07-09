@@ -21,7 +21,7 @@ namespace eRPC
     ~Server();
 
     /**
-     * Start the server loop.
+     * Start the server loop. This will block until the server is stopped.
      */
     void start();
 
@@ -39,6 +39,11 @@ namespace eRPC
     int sockfd;
     bool running;
     std::unordered_map<std::string, std::function<std::pair<bool, std::string>(std::vector<std::string>)>> methods;
+
+    /**
+     * Keep a socket open and serve a client until they disconnect.
+     */
+    void serveClient(int connfd);
   };
 }
 

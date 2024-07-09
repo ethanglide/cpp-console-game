@@ -72,7 +72,7 @@ std::pair<bool, std::string> echo(std::vector<std::string> args)
 
   std::cout << std::endl;
 
-  return {true, "Echo Successful"};
+  return {true, ""};
 }
 
 int main(int argc, char **argv)
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     client.call("echo", {"Hello", "World"});
     client.call("movePlayer", {"1", "5", "5"});
     client.call("movePlayer", {"1", "6", "6"});
-    auto ret = client.call("echol", {"Goodbye", "World"});
+    auto ret = client.call("echo", {"Goodbye", "World"});
 
     std::cout << "Result: " << ret << std::endl;
   }

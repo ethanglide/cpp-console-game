@@ -15,7 +15,7 @@ namespace ConsoleGame
 
   std::string Board::draw()
   {
-    std::string board = "\033[H";  // Move cursor to the top left corner
+    std::string board;
 
     for (auto row : cells)
     {

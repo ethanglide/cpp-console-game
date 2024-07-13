@@ -11,6 +11,12 @@ namespace ConsoleGame
   {
     playerId = addPlayer();
 
+    if (playerId == -1)
+    {
+      std::cerr << "Failed to add player" << std::endl;
+      return;
+    }
+
     std::thread renderThread(&GameClient::renderLoop, this);
     std::thread inputThread(&GameClient::inputLoop, this);
 
@@ -26,10 +32,11 @@ namespace ConsoleGame
     {
       auto res = client.call("draw", {});
 
-      //replace all "|" with newline
+      // replace all "|" with newline
       std::replace(res.begin(), res.end(), '|', '\n');
 
-      std::cout << res << std::endl;
+      std::cout << "\033[H" << res << std::endl;
+
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
   }

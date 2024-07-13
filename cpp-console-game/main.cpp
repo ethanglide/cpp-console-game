@@ -5,15 +5,14 @@
 
 int main(int argc, char **argv)
 {
-  if (argc < 4)
+  if (argc < 3)
   {
-    std::cerr << "Usage: " << argv[0] << "<client/server> <port> <host>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <client/server> <port>" << std::endl;
     return EXIT_FAILURE;
   }
 
   std::string mode = argv[1];
   int port = std::stoi(argv[2]);
-  std::string host = argv[3];
 
   if (mode == "server")
   {
@@ -21,11 +20,20 @@ int main(int argc, char **argv)
   }
   else if (mode == "client")
   {
+    if (argc < 4)
+    {
+      std::cerr << "Usage: " << argv[0] << " client <port> <host>" << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    std::string host = argv[3];
+
     ConsoleGame::GameClient client(host, port);
   }
   else
   {
-    std::cerr << "Invalid mode" << std::endl;
+    std::cerr << "Invalid mode \"" << mode << "\"" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <client/server> <port>" << std::endl;
     return EXIT_FAILURE;
   }
 

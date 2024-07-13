@@ -15,6 +15,12 @@ namespace ConsoleGame
   {
     std::lock_guard<std::mutex> lock(mutex);
 
+    // Check if the game is full
+    if (players.size() >= board.getWidth() * board.getHeight())
+    {
+      return -1;
+    }
+
     // Add a player to the game at a random position
     int x, y;
     do
@@ -46,8 +52,12 @@ namespace ConsoleGame
   {
     std::lock_guard<std::mutex> lock(mutex);
 
-    // Check if the new position is out of bounds
-    if (newPos.first < 0 || newPos.first >= board.getWidth() || newPos.second < 0 || newPos.second >= board.getHeight())
+    // Check if the new position is out of bounds or occupied
+    if (newPos.first < 0 ||
+        newPos.first >= board.getWidth() ||
+        newPos.second < 0 ||
+        newPos.second >= board.getHeight() ||
+        board.getCell(newPos.first, newPos.second) != board.getFill())
     {
       return;
     }
